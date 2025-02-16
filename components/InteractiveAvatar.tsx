@@ -128,12 +128,12 @@ export default function InteractiveAvatar() {
     });
     try {
       const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.Low,
+        quality: AvatarQuality.Medium,
         avatarName: avatarId,
         knowledgeId: knowledgeId, // Or use a custom `knowledgeBase`.
         voice: {
           rate: 1.5, // 0.5 ~ 1.5
-          emotion: VoiceEmotion.EXCITED,
+          emotion: VoiceEmotion.SERIOUS,
           // elevenlabsSettings: {
           //   stability: 1,
           //   similarity_boost: 1,
