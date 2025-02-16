@@ -96,7 +96,7 @@ export default function InteractiveAvatar() {
       const responseData = await response.json()
       console.log('response:', responseData)
 
-      if (!callTriggered.current && responseData["need_to_call_doctor"]) {
+      if (!callTriggered.current && (responseData["need_to_call_doctor"] == "yes" || responseData["need_to_call_doctor"] == "Yes" || responseData["need_to_call_doctor"] == "YES")) {
         callTriggered.current = true
         fetch(callWebhook, {
           mode: 'no-cors'
