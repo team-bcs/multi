@@ -160,14 +160,14 @@ export default function InteractiveAvatar() {
               const response = await llmCall(data.channel.alternatives[0].transcript)
               console.log('<- ', response);
 
-              await avatar.current.speak({ text: response, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => {
+              await avatar!.current!.speak({ text: response, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => {
                 setDebug(e.message);
               });
             }
           });
         });
 
-        micRecorder.current.addEventListener('dataavailable', (event: Event) => {
+        micRecorder.current.addEventListener('dataavailable', (event: BlobEvent) => {
           if (event.data.size > 0) {
             live.current.send(event.data)
           }
