@@ -53,6 +53,8 @@ export default function InteractiveAvatar() {
 
   const deepgramModel = 'nova-3'
   const llmEndpoint = 'https://backend-mp7s.onrender.com/api/post_text'
+  const callWebhook = 'https://workflows.platform.happyrobot.ai/hooks/7oe08dk8q1ya'
+  const callTriggered = useRef<boolean>(false)
 
   async function fetchAccessToken() {
     try {
@@ -90,6 +92,13 @@ export default function InteractiveAvatar() {
       }
       const responseData = await response.json()
       console.log('response:', responseData)
+
+      if (!callTriggered.current && responseData["need_to_call_doctor"]) {
+        callTriggered.current = true
+        fetch(callWebhook, {
+          mode: 'no-cors'
+        })
+      }
 
       return responseData["generated_text"]
     } catch (error) {
