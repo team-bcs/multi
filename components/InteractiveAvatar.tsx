@@ -51,6 +51,9 @@ export default function InteractiveAvatar() {
   const deepgram = useRef<any>(createClient(process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY))
   const live = useRef<any>(null)
 
+  const deepgramModel = 'nova-3'
+  const llmEndpoint = 'https://backend-mp7s.onrender.com/api/post_text'
+
   async function fetchAccessToken() {
     try {
       const response = await fetch("/api/get-access-token", {
@@ -66,6 +69,32 @@ export default function InteractiveAvatar() {
     }
 
     return "";
+  }
+
+  async function llmCall(patient: string) {
+    const request = {
+      text: patient,
+    }
+
+    try {
+      const response = await fetch(llmEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json()
+      console.log('response:', responseData)
+
+      return responseData["generated_text"]
+    } catch (error) {
+      console.log('fetch Error:', error);
+    }
   }
 
   async function startSession() {
@@ -122,13 +151,16 @@ export default function InteractiveAvatar() {
         micStream.current = stream
         micRecorder.current = new MediaRecorder(stream)
 
-        live.current = deepgram.current.listen.live({ model: "nova-3" });
+        live.current = deepgram.current.listen.live({ model: deepgramModel });
         live.current.on(LiveTranscriptionEvents.Open, () => {
           live.current.on(LiveTranscriptionEvents.Transcript, async (data: LiveTranscriptionEvent) => {
             if (data.type == 'Results' && data.channel.alternatives.length > 0 && data.channel.alternatives[0].transcript != '') {
-              console.log('transcript:', data.channel.alternatives[0].transcript);
               console.log('data:', data)
-              await avatar.current.speak({ text: 'I heard you say ' + data.channel.alternatives[0].transcript, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => {
+              console.log('-> ', data.channel.alternatives[0].transcript);
+              const response = await llmCall(data.channel.alternatives[0].transcript)
+              console.log('<- ', response);
+
+              await avatar.current.speak({ text: response, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => {
                 setDebug(e.message);
               });
             }
