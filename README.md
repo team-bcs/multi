@@ -1,5 +1,11 @@
 # HeyGen Interactive Avatar NextJS Demo
 
+
+## Quick start
+`./node_modules/.bin/next dev -p 8000 -H 0.0.0.0`
+
+`./node_modules/.bin/next dev -p 8000 -H 0.0.0.0 --experimental-https --experimental-https-key ./keyfile.pem --experimental-https-cert ./certfile.pem`
+
 ![HeyGen Interactive Avatar NextJS Demo Screenshot](./public/demo.png)
 
 This is a sample project and was bootstrapped using [NextJS](https://nextjs.org/).

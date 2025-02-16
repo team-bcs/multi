@@ -52,7 +52,8 @@ export default function InteractiveAvatar() {
   const live = useRef<any>(null)
 
   const deepgramModel = 'nova-3'
-  const llmEndpoint = 'https://backend-mp7s.onrender.com/api/post_text'
+  const llmEndpoint = 'http://localhost:5000/api/post_text'
+  const mediaEndpoint = 'http://localhost:5000/upload_media'
   const callWebhook = 'https://workflows.platform.happyrobot.ai/hooks/7oe08dk8q1ya'
   const callTriggered = useRef<boolean>(false)
 
@@ -185,6 +186,47 @@ export default function InteractiveAvatar() {
         })
         micRecorder.current.start(250)
       })
+
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { height: 720 }, audio: true })
+      const recordedChunks: Blob[] = []
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "video/webm;codecs=vp8,opus"
+      })
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunks.push(event.data);
+        }
+      };
+      window.setTimeout(() => {
+        mediaRecorder.stop()
+      }, 10000)
+      mediaRecorder.start();
+      mediaRecorder.onstop = () => {
+        const recordedBlob = new Blob(recordedChunks, { type: 'video/mp4' });
+
+        // Send the blob to Flask
+        const formData = new FormData();
+        formData.append("media_file", recordedBlob, "recording.mp4");
+
+        fetch(mediaEndpoint, {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Server response:", data);
+          })
+          .catch((err) => {
+            console.error("Upload error:", err);
+          })
+          .finally(() => {
+            // Release camera + mic if you want:
+            if (stream) {
+              stream.getTracks().forEach((track) => track.stop());
+            }
+          });
+      }
 
       // default to voice mode
       // await avatar.current?.startVoiceChat({
