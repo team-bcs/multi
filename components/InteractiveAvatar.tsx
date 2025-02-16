@@ -1,8 +1,13 @@
+import type { LiveTranscriptionEvent } from "@deepgram/sdk"
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
 
+import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk"
 import StreamingAvatar, {
   AvatarQuality,
-  StreamingEvents, TaskMode, TaskType, VoiceEmotion,
+  StreamingEvents,
+  TaskMode,
+  TaskType,
+  VoiceEmotion,
 } from "@heygen/streaming-avatar";
 import {
   Button,
@@ -40,6 +45,11 @@ export default function InteractiveAvatar() {
   const avatar = useRef<StreamingAvatar | null>(null);
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
+
+  const micStream = useRef<any>(null)
+  const micRecorder = useRef<any>(null)
+  const deepgram = useRef<any>(createClient(process.env.NEXT_PUBLIC_DEEPGRAM_API_KEY))
+  const live = useRef<any>(null)
 
   async function fetchAccessToken() {
     try {
@@ -107,11 +117,37 @@ export default function InteractiveAvatar() {
       });
 
       setData(res);
+
+      navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+        micStream.current = stream
+        micRecorder.current = new MediaRecorder(stream)
+
+        live.current = deepgram.current.listen.live({ model: "nova-3" });
+        live.current.on(LiveTranscriptionEvents.Open, () => {
+          live.current.on(LiveTranscriptionEvents.Transcript, async (data: LiveTranscriptionEvent) => {
+            if (data.type == 'Results' && data.channel.alternatives.length > 0 && data.channel.alternatives[0].transcript != '') {
+              console.log('transcript:', data.channel.alternatives[0].transcript);
+              console.log('data:', data)
+              await avatar.current.speak({ text: 'I heard you say ' + data.channel.alternatives[0].transcript, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => {
+                setDebug(e.message);
+              });
+            }
+          });
+        });
+
+        micRecorder.current.addEventListener('dataavailable', (event: Event) => {
+          if (event.data.size > 0) {
+            live.current.send(event.data)
+          }
+        })
+        micRecorder.current.start(250)
+      })
+
       // default to voice mode
-      await avatar.current?.startVoiceChat({
-        useSilencePrompt: false
-      });
-      setChatMode("voice_mode");
+      // await avatar.current?.startVoiceChat({
+      //   useSilencePrompt: false
+      // });
+      // setChatMode("voice_mode");
     } catch (error) {
       console.error("Error starting avatar session:", error);
     } finally {
