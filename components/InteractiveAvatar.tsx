@@ -36,7 +36,7 @@ export default function InteractiveAvatar() {
   const [stream, setStream] = useState<MediaStream>();
   const [debug, setDebug] = useState<string>();
   const [knowledgeId, setKnowledgeId] = useState<string>("");
-  const [avatarId, setAvatarId] = useState<string>("");
+  const [avatarId, setAvatarId] = useState<string>("Ann_Therapist_public");
   const [language, setLanguage] = useState<string>('en');
 
   const [data, setData] = useState<StartAvatarResponse>();
@@ -255,148 +255,142 @@ export default function InteractiveAvatar() {
 
   return (
     <div className="w-full flex flex-col gap-4">
-      <Card>
-        <CardBody className="h-[500px] flex flex-col justify-center items-center">
-          {stream ? (
-            <div className="h-[500px] w-[900px] justify-center items-center flex rounded-lg overflow-hidden">
-              <video
-                ref={mediaStream}
-                autoPlay
-                playsInline
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                }}
-              >
-                <track kind="captions" />
-              </video>
-              <div className="flex flex-col gap-2 absolute bottom-3 right-3">
-                <Button
-                  className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white rounded-lg"
-                  size="md"
-                  variant="shadow"
-                  onClick={handleInterrupt}
-                >
-                  Interrupt task
-                </Button>
-                <Button
-                  className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
-                  size="md"
-                  variant="shadow"
-                  onClick={endSession}
-                >
-                  End session
-                </Button>
-              </div>
-            </div>
-          ) : !isLoadingSession ? (
-            <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
-              <div className="flex flex-col gap-2 w-full">
-                <p className="text-sm font-medium leading-none">
-                  Custom Knowledge ID (optional)
-                </p>
-                <Input
-                  placeholder="Enter a custom knowledge ID"
-                  value={knowledgeId}
-                  onChange={(e) => setKnowledgeId(e.target.value)}
-                />
-                <p className="text-sm font-medium leading-none">
-                  Custom Avatar ID (optional)
-                </p>
-                <Input
-                  placeholder="Enter a custom avatar ID"
-                  value={avatarId}
-                  onChange={(e) => setAvatarId(e.target.value)}
-                />
-                <Select
-                  placeholder="Or select one from these example avatars"
-                  size="md"
-                  onChange={(e) => {
-                    setAvatarId(e.target.value);
-                  }}
-                >
-                  {AVATARS.map((avatar) => (
-                    <SelectItem
-                      key={avatar.avatar_id}
-                      textValue={avatar.avatar_id}
-                    >
-                      {avatar.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Select language"
-                  placeholder="Select language"
-                  className="max-w-xs"
-                  selectedKeys={[language]}
-                  onChange={(e) => {
-                    setLanguage(e.target.value);
-                  }}
-                >
-                  {STT_LANGUAGE_LIST.map((lang) => (
-                    <SelectItem key={lang.key}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
-              <Button
-                className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
-                size="md"
-                variant="shadow"
-                onClick={startSession}
-              >
-                Start session
-              </Button>
-            </div>
-          ) : (
-            <Spinner color="default" size="lg" />
-          )}
-        </CardBody>
-        <Divider />
-        <CardFooter className="flex flex-col gap-3 relative">
-          <Tabs
-            aria-label="Options"
-            selectedKey={chatMode}
-            onSelectionChange={(v) => {
-              handleChangeChatMode(v);
+      {stream ? (
+        <div className="h-full w-full justify-center items-center flex rounded-lg overflow-hidden">
+          <video
+            ref={mediaStream}
+            autoPlay
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
             }}
           >
-            <Tab key="text_mode" title="Text mode" />
-            <Tab key="voice_mode" title="Voice mode" />
-          </Tabs>
-          {chatMode === "text_mode" ? (
-            <div className="w-full flex relative">
-              <InteractiveAvatarTextInput
-                disabled={!stream}
-                input={text}
-                label="Chat"
-                loading={isLoadingRepeat}
-                placeholder="Type something for the avatar to respond"
-                setInput={setText}
-                onSubmit={handleSpeak}
-              />
-              {text && (
-                <Chip className="absolute right-16 top-3">Listening</Chip>
-              )}
-            </div>
-          ) : (
-            <div className="w-full text-center">
-              <Button
-                isDisabled={!isUserTalking}
-                className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white"
-                size="md"
-                variant="shadow"
-              >
-                {isUserTalking ? "Listening" : "Voice chat"}
-              </Button>
-            </div>
+            <track kind="captions" />
+          </video>
+          <div className="flex flex-col gap-2 absolute bottom-3 right-3">
+            <Button
+              className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white rounded-lg"
+              size="md"
+              variant="shadow"
+              onClick={handleInterrupt}
+            >
+              Interrupt task
+            </Button>
+            <Button
+              className="bg-gradient-to-tr from-indigo-500 to-indigo-300  text-white rounded-lg"
+              size="md"
+              variant="shadow"
+              onClick={endSession}
+            >
+              End session
+            </Button>
+          </div>
+        </div>
+      ) : !isLoadingSession ? (
+        <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
+          <div className="flex flex-col gap-2 w-full">
+            <p className="text-sm font-medium leading-none">
+              Custom Knowledge ID (optional)
+            </p>
+            <Input
+              placeholder="Enter a custom knowledge ID"
+              value={knowledgeId}
+              onChange={(e) => setKnowledgeId(e.target.value)}
+            />
+            <p className="text-sm font-medium leading-none">
+              Custom Avatar ID (optional)
+            </p>
+            <Input
+              placeholder="Enter a custom avatar ID"
+              value={avatarId}
+              onChange={(e) => setAvatarId(e.target.value)}
+            />
+            <Select
+              placeholder="Or select one from these example avatars"
+              size="md"
+              onChange={(e) => {
+                setAvatarId(e.target.value);
+              }}
+            >
+              {AVATARS.map((avatar) => (
+                <SelectItem
+                  key={avatar.avatar_id}
+                  textValue={avatar.avatar_id}
+                >
+                  {avatar.name}
+                </SelectItem>
+              ))}
+            </Select>
+            <Select
+              label="Select language"
+              placeholder="Select language"
+              className="max-w-xs"
+              selectedKeys={[language]}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+              }}
+            >
+              {STT_LANGUAGE_LIST.map((lang) => (
+                <SelectItem key={lang.key}>
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </Select>
+          </div>
+          <Button
+            className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
+            size="md"
+            variant="shadow"
+            onClick={startSession}
+          >
+            Start session
+          </Button>
+        </div>
+      ) : (
+        <Spinner color="default" size="lg" />
+      )}
+    <Divider />
+      {/* <Tabs
+        aria-label="Options"
+        selectedKey={chatMode}
+        onSelectionChange={(v) => {
+          handleChangeChatMode(v);
+        }}
+      >
+        <Tab key="text_mode" title="Text mode" />
+        <Tab key="voice_mode" title="Voice mode" />
+      </Tabs>
+      {chatMode === "text_mode" ? (
+        <div className="w-full flex relative">
+          <InteractiveAvatarTextInput
+            disabled={!stream}
+            input={text}
+            label="Chat"
+            loading={isLoadingRepeat}
+            placeholder="Type something for the avatar to respond"
+            setInput={setText}
+            onSubmit={handleSpeak}
+          />
+          {text && (
+            <Chip className="absolute right-16 top-3">Listening</Chip>
           )}
-        </CardFooter>
-      </Card>
+        </div>
+      ) : (
+        <div className="w-full text-center">
+          <Button
+            isDisabled={!isUserTalking}
+            className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white"
+            size="md"
+            variant="shadow"
+          >
+            {isUserTalking ? "Listening" : "Voice chat"}
+          </Button>
+        </div>
+      )} */}
       <p className="font-mono text-right">
-        <span className="font-bold">Console:</span>
+        <span className="text-slate-400">Console:</span>
         <br />
         {debug}
       </p>

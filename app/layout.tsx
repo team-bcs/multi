@@ -19,8 +19,8 @@ const fontMono = FontMono({
 
 export const metadata: Metadata = {
   title: {
-    default: "HeyGen Interactive Avatar SDK Demo",
-    template: `%s - HeyGen Interactive Avatar SDK Demo`,
+    default: "Team BCS patient assistant",
+    template: `%s - Team BCS patient assistant`,
   },
   icons: {
     icon: "/heygen-logo.png",
